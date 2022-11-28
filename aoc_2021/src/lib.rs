@@ -15,8 +15,16 @@ pub fn read_input(i: i32) -> Result<Vec<i32>> {
             out.push(res);
         }
     }
-    // println!("....retrieved input data\n");
     Ok(out)
+}
+
+pub fn read_input_str(i: i32) -> Result<Vec<String>> {
+    let f = File::open(format!("{BASE_PATH}\\{i}.txt"))?;
+    let reader = BufReader::new(f);
+    Ok(reader
+        .lines()
+        .map(|s| s.expect("failed to parse"))
+        .collect::<Vec<String>>())
 }
 
 #[cfg(test)]
@@ -24,12 +32,45 @@ mod tests {
     use super::*;
 
     #[test]
+    fn task2() {
+        let data = read_input_str(2).unwrap();
+
+        let mut horiz = 0;
+        let mut vert = 0;
+
+        let ok = data
+            .iter()
+            .map(|f| f.split_once(' ').unwrap())
+            .collect::<Vec<(&str, &str)>>();
+
+        for (dir, amt) in ok {
+            if dir.starts_with('f') {
+                horiz += amt.parse::<i32>().unwrap();
+            } else if dir.starts_with('d') {
+                vert += amt.parse::<i32>().unwrap();
+            } else if dir.starts_with('u') {
+                vert -= amt.parse::<i32>().unwrap();
+            }
+        }
+
+        println!("Result >>>> {} ,{}, > TOTAL {}", horiz, vert, horiz * vert);
+        assert_eq!(data.len() > 0, true);
+    }
+    //help:
+    //NOTE: https://github.com/rust-lang/rust/issues/77998
+    //https://stackoverflow.com/questions/34559640/what-is-the-correct-idiomatic-way-to-check-if-a-string-starts-with-a-certain-c
+
+    #[test]
+    #[ignore]
     fn task1_2() {
         let data = read_input(1).unwrap();
 
         let sum = data.iter().enumerate().fold(0, |acc, (i, _)| {
             //Start comparing batches from 4th element
-            if i > 2 && [data[i], data[i - 1], data[i - 2]].iter().sum::<i32>() > [data[i - 1], data[i - 2], data[i - 3]].iter().sum::<i32>() {
+            if i > 2
+                && [data[i], data[i - 1], data[i - 2]].iter().sum::<i32>()
+                    > [data[i - 1], data[i - 2], data[i - 3]].iter().sum::<i32>()
+            {
                 acc + 1
             } else {
                 acc
@@ -38,7 +79,6 @@ mod tests {
 
         println!("Result >>>> {}", sum);
         assert_eq!(data.len() > 0, true);
-        
     }
 
     #[test]
