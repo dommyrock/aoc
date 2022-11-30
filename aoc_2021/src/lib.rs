@@ -32,6 +32,34 @@ mod tests {
     use super::*;
 
     #[test]
+    fn task2_p2() {
+        let data = read_input_str(2).unwrap();
+        let (mut horiz, mut vert, mut aim) = (0, 0, 0);
+
+        let ok = data
+            .iter()
+            .map(|f| f.split_once(' ').unwrap())
+            .collect::<Vec<(&str, &str)>>();
+
+        for (dir, amt) in ok {
+            if dir.starts_with('f') {
+                horiz += amt.parse::<i32>().unwrap();
+                vert += amt.parse::<i32>().unwrap() * aim;
+            } else if dir.starts_with('d') {
+                // vert += amt.parse::<i32>().unwrap();
+                aim += amt.parse::<i32>().unwrap();
+            } else if dir.starts_with('u') {
+                // vert -= amt.parse::<i32>().unwrap();
+                aim -= amt.parse::<i32>().unwrap();
+            }
+        }
+        println!("Result >>>> {} ,{}, > TOTAL {}", horiz, vert, horiz * vert);
+        assert_eq!(data.len() > 0, true);
+    }
+    //https://doc.rust-lang.org/std/fmt/#formatting-traits
+
+    #[test]
+    #[ignore]
     fn task2() {
         let data = read_input_str(2).unwrap();
 
@@ -52,7 +80,6 @@ mod tests {
                 vert -= amt.parse::<i32>().unwrap();
             }
         }
-
         println!("Result >>>> {} ,{}, > TOTAL {}", horiz, vert, horiz * vert);
         assert_eq!(data.len() > 0, true);
     }
