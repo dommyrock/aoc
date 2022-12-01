@@ -32,6 +32,13 @@ mod tests {
     use super::*;
 
     #[test]
+    fn task3(){
+        //working with binary data
+        //https://doc.rust-lang.org/rust-by-example/primitives/literals.html
+        //https://doc.rust-lang.org/std/fmt/trait.Binary.html
+        //https://stackoverflow.com/questions/61235827/how-do-i-manipulate-binary-numbers-in-rust
+    }
+    #[test]
     fn task2_p2() {
         let data = read_input_str(2).unwrap();
         let (mut horiz, mut vert, mut aim) = (0, 0, 0);

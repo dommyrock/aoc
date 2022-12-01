@@ -1,3 +1,6 @@
 /target
-/inputs
 /Cargo.lock
+
+#exclude folder and onputs
+/src/inputs/
+/src/inputs/*
