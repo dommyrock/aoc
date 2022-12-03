@@ -1,22 +1,171 @@
-use std::{
-    fs::File,
-    io::{BufRead, BufReader, Result},
-    //   | cargo test -- --show-output
-    //or | cargo test -- --nocapture
-};
-const INPUT_PATH: &str = "D:\\Me\\Git\\aoc\\aoc_2022\\src\\inputs";
+/*Run tests
+cargo test -- --show-output
+cargo test -- --nocapture
+*/
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
+    use std::{
+        collections::{HashMap, HashSet},
+        fs::File,
+        io::{BufRead, BufReader, Result},
+        ops::RangeInclusive,
+    };
+    const INPUT_PATH: &str = "D:\\Me\\Git\\aoc\\aoc_2022\\src\\inputs";
 
-    fn task2() {
-        //ready
+    #[test]
+    fn task3_2() -> Result<()> {
+        let mut sum = 0;
+        let (dict_l, dict_u) = get_hashsets([('a'..='z'), ('A'..='Z')]);
+
+        let f = File::open(format!("{INPUT_PATH}\\{}.txt", 3))?;
+        let rows: Vec<String> = BufReader::new(f)
+            .lines()
+            .map(core::result::Result::unwrap)
+            .collect();
+        let groups = rows.chunks(3);
+
+        for chunk in groups {
+            let first: HashSet<char> = chunk.first().unwrap().chars().collect();
+            for item in first {
+                if let (Some(first), Some(_)) = (chunk[1].find(item), chunk[2].find(item)) {
+                    let team_mark = chunk[1].chars().nth(first).unwrap();
+                    match team_mark.is_lowercase() {
+                        true => sum += *dict_l.get(&team_mark).unwrap(),
+                        false => sum += *dict_u.get(&team_mark).unwrap(),
+                    }
+                    continue;
+                }
+            }
+        }
+        println!("Part 2 sum > {}", sum); //2444
+        Ok(())
     }
 
     #[test]
-    // #[ignore]
+    #[ignore]
+    fn task3() -> Result<()> {
+        let mut score = 0;
+        let (dict_l, dict_u) = get_hashsets([('a'..='z'), ('A'..='Z')]);
+
+        let f = File::open(format!("{INPUT_PATH}\\{}.txt", 3))?;
+        for line in BufReader::new(f).lines() {
+            let mapped: Vec<usize> = line?
+                .chars()
+                .map(|c| {
+                    if c.is_lowercase() {
+                        *dict_l.get(&c).unwrap()
+                    } else {
+                        *dict_u.get(&c).unwrap()
+                    }
+                })
+                .collect();
+            let half = mapped.len() / 2;
+
+            let found: Vec<Option<usize>> = mapped[..half]
+                .iter()
+                .map(|n| {
+                    if mapped[half..].iter().any(|v| *v == *n) {
+                        Some(*n)
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+
+            let ok: Vec<usize> = found
+                .iter()
+                .filter_map(|x| match x {
+                    Some(_) => *x,
+                    None => None,
+                })
+                .collect();
+
+            if let Some(fst) = ok.first() {
+                score += fst;
+            }
+        }
+        println!("Part 1 Score > {}", score);
+        Ok(())
+    }
+
+    fn get_hashsets(r: [RangeInclusive<char>; 2]) -> (HashMap<char, usize>, HashMap<char, usize>) {
+        let mut dict_l: HashMap<char, usize> = HashMap::new();
+        let mut dict_u: HashMap<char, usize> = HashMap::new();
+        let (mut idx, mut idx2) = (1, 27);
+
+        // a-z = 1-26
+        for c in r.get(0).unwrap().clone() {
+            dict_l.insert(c, idx);
+            idx += 1;
+        }
+        // A-Z = 27-52
+        for c in r.get(1).unwrap().clone() {
+            dict_u.insert(c, idx2);
+            idx2 += 1;
+        }
+        return (dict_l, dict_u);
+    }
+
+    #[test]
+    #[ignore]
+    fn task2_2() -> Result<()> {
+        let f = File::open(format!("{INPUT_PATH}\\{}.txt", 2))?;
+        let mut score = 0;
+        for ln in BufReader::new(f).lines() {
+            if let Some((op, me)) = ln?.split_once(' ') {
+                match (op, me) {
+                    ("A", "X") => score += 3 + 0,
+                    ("A", "Y") => score += 1 + 3,
+                    ("A", "Z") => score += 2 + 6,
+                    ("B", "X") => score += 1 + 0,
+                    ("B", "Y") => score += 2 + 3,
+                    ("B", "Z") => score += 3 + 6,
+                    ("C", "X") => score += 2 + 0,
+                    ("C", "Y") => score += 3 + 3,
+                    ("C", "Z") => score += 1 + 6,
+                    _ => (),
+                }
+            }
+        }
+        println!("Score 2> {}", score);
+        Ok(())
+        //X means lose, Y means draw, and Z means win.
+        /*C,Z =Scissors =3
+        *A,X =Rock = 1
+        *B,Y =Paper =2
+        win =6 ,draw = 3, loss=0
+        */
+    }
+
+    #[test]
+    #[ignore]
+    fn task2() -> Result<()> {
+        let f = File::open(format!("{INPUT_PATH}\\{}.txt", 2))?;
+        let mut score = 0;
+        for ln in BufReader::new(f).lines() {
+            if let Some((op, me)) = ln?.split_once(' ') {
+                match (op, me) {
+                    ("A", "X") => score += 1 + 3,
+                    ("A", "Y") => score += 2 + 6,
+                    ("A", "Z") => score += 3 + 0,
+                    ("B", "X") => score += 1 + 0,
+                    ("B", "Y") => score += 2 + 3,
+                    ("B", "Z") => score += 3 + 6,
+                    ("C", "X") => score += 1 + 6,
+                    ("C", "Y") => score += 2 + 0,
+                    ("C", "Z") => score += 3 + 3,
+                    _ => (),
+                }
+            }
+        }
+        println!("Score > {}", score);
+        Ok(())
+    }
+
+    #[test]
+    #[ignore]
     fn task1_2() -> Result<()> {
         let f = File::open(format!("{INPUT_PATH}\\{}.txt", 1))?;
         let reader = BufReader::new(f);
@@ -77,34 +226,18 @@ FromStr     https://doc.rust-lang.org/std/str/trait.FromStr.html
 
 
 //Sum by Descending Example
-//     max.sort();
-// println!("{:?}", max);
-// max.sort_by(|a, b| b.cmp(a));
+    max.sort();
+    println!("{:?}", max);
+    max.sort_by(|a, b| b.cmp(a));
+
+//Converting numbers from string "1232" to numbers --> https://doc.rust-lang.org/std/primitive.char.html#method.to_digit
+    const HEX_RADIX: u32 = 16;
+    let vecc = std::ops::RangeInclusive::new(1, 26);
+
+//Maping range to Hashmap
+    (1..5).map(|i| (i + i, i * i)).collect::<HashMap<_, _>>()
+
 */
 
 // Bellow "\n\n" doesn't work on windows
 // let lines = include_str!("inputs/1.txt").split("\n\n"); //OR std::fs::read_to_string("./src/inputs/1.txt").unwrap()
-
-//------------------------------Utils------------------------------
-pub fn read_input(i: i32) -> Result<Vec<i32>> {
-    let mut out: Vec<i32> = vec![];
-
-    let f = File::open(format!("{INPUT_PATH}\\{i}.txt"))?;
-    let reader = BufReader::new(f);
-
-    for line in reader.lines() {
-        if let Ok(res) = line?.parse::<i32>() {
-            out.push(res);
-        }
-    }
-    Ok(out)
-}
-
-pub fn read_input_str(i: i32) -> Result<Vec<String>> {
-    let f = File::open(format!("{INPUT_PATH}\\{i}.txt"))?;
-    let reader = BufReader::new(f);
-    Ok(reader
-        .lines()
-        .map(|s| s.expect("failed to parse"))
-        .collect::<Vec<String>>())
-}
