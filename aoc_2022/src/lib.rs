@@ -2,18 +2,93 @@
 cargo test -- --show-output
 cargo test -- --nocapture
 */
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::{
-        collections::{HashMap, HashSet},
+        collections::{HashMap, HashSet, VecDeque},
         fs::File,
-        io::{BufRead, BufReader, Result, Split},
+        io::{BufRead, BufReader, Result},
         ops::RangeInclusive,
     };
     const INPUT_PATH: &str = "D:\\Me\\Git\\aoc\\aoc_2022\\src\\inputs";
 
     #[test]
+    fn task5() -> Result<()> {
+        let index_map: HashMap<usize, i32> = HashMap::from([
+            (1, 1),
+            (5, 2),
+            (9, 3),
+            (13, 4),
+            (17, 5),
+            (21, 6),
+            (25, 7),
+            (29, 8),
+            (33, 9),
+        ]);
+        let mut third_map: HashMap<i32, VecDeque<char>> = HashMap::new();
+
+        for (part, text_block) in std::fs::read_to_string("./src/inputs/5.txt")?
+            .split("\r\n\r\n")
+            .enumerate()
+        {
+            if part == 0 {
+                //Add state to memory
+                for line in text_block.lines() {
+                    for (char_pos, chr) in line.chars().enumerate() {
+                        if [' ', '[', ']'].iter().all(|x| *x != chr) && !chr.is_digit(10) {
+                            third_map
+                                .entry(index_map[&char_pos])
+                                .or_insert(VecDeque::new())
+                                .push_back(chr);
+                        }
+                    }
+                }
+            } else {
+                let cmd_list = text_block
+                    .lines()
+                    .map(|ln| {
+                        ln.split_whitespace()
+                            .filter(|txt| txt.parse::<i32>().is_ok())
+                            .map(|x| x.parse::<i32>().unwrap())
+                            .collect::<Vec<i32>>()
+                    })
+                    .collect::<Vec<Vec<i32>>>();
+
+                //Update the state
+                for cmd_set in cmd_list {
+                    //p1
+                    for _ in 0..cmd_set[0] {
+                        if let Some(x) = third_map.get_mut(&cmd_set[1]) {
+                            //add poped
+                            if let Some(val) = x.pop_front() {
+                                if let Some(v) = third_map.get_mut(&cmd_set[2]) {
+                                    v.push_front(val);
+                                }
+                            }
+                        }
+                    }
+                    //p2
+                    // if let Some(x) = third_map.get_mut(&cmd_set[1]) {
+                    //     let poped: VecDeque<char> =
+                    //         x.drain(..cmd_set[0] as usize).collect::<VecDeque<char>>();
+                    //     if let Some(ok) = third_map.get_mut(&cmd_set[2]) {
+                    //         poped.iter().rev().for_each(|x| ok.push_front(*x));
+                    //     }
+                    // }
+                }
+                //Result state
+                for (key, val) in &third_map {
+                    println!("Key {}, Peek : [{:?}]", key, val.front());
+                }
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    #[ignore]
     fn task4_1_2() -> Result<()> {
         let (mut overlap2, mut overlap1) = (0, 0);
         let range_pairs: Vec<Vec<i32>> = include_str!("./inputs/4.txt")
@@ -21,7 +96,11 @@ mod tests {
             .map(|x| x.split(',').collect::<Vec<&str>>())
             .flat_map(|y| y)
             .map(|x| x.split('-').collect::<Vec<&str>>())
-            .map(|v| v.into_iter().map(|w| w.parse::<i32>().unwrap()).collect::<Vec<i32>>())
+            .map(|v| {
+                v.into_iter()
+                    .map(|w| w.parse::<i32>().unwrap())
+                    .collect::<Vec<i32>>()
+            })
             .collect();
 
         for pair in range_pairs.chunks(2) {
@@ -31,8 +110,12 @@ mod tests {
             if lr_start <= rr_end && lr_end >= rr_start {
                 overlap2 += 1;
             }
-            if [lr_start, lr_end].iter().all(|x| (rr_start..=rr_end).contains(x))
-            || [rr_start, rr_end].iter().all(|x| (lr_start..=lr_end).contains(x))
+            if [lr_start, lr_end]
+                .iter()
+                .all(|x| (rr_start..=rr_end).contains(x))
+                || [rr_start, rr_end]
+                    .iter()
+                    .all(|x| (lr_start..=lr_end).contains(x))
             {
                 overlap1 += 1;
             }
@@ -67,16 +150,15 @@ mod tests {
         let (dict_l, dict_u) = get_hashsets([('a'..='z'), ('A'..='Z')]);
 
         let f = File::open(format!("{INPUT_PATH}\\{}.txt", 3))?;
-        let rows: Vec<String> = BufReader::new(f)
+        let rows = BufReader::new(f)
             .lines()
             .map(core::result::Result::unwrap)
-            .collect();
-        let groups = rows.chunks(3);
+            .collect::<Vec<String>>();
 
-        for chunk in groups {
+        for chunk in rows.chunks(3) {
             let first_of_group: HashSet<char> = chunk.first().unwrap().chars().collect();
-            for item in first_of_group {
-                if let (Some(second), Some(_third)) = (chunk[1].find(item), chunk[2].find(item)) {
+            for c in first_of_group {
+                if let (Some(second), Some(_third)) = (chunk[1].find(c), chunk[2].find(c)) {
                     let team_mark = chunk[1].chars().nth(second).unwrap();
                     match team_mark.is_lowercase() {
                         true => sum += *dict_l.get(&team_mark).unwrap(),
@@ -286,6 +368,8 @@ FromStr     https://doc.rust-lang.org/std/str/trait.FromStr.html
 \n\r = CR + LF // Used as a new line character in Windows
 (char)13 = \n = CR // Same as \n
 
+//read all contents to memory
+for ln in std::fs::read_to_string("C:\\Users\\dpolzer\\Downloads")?.lines() {
 
 //Sum by Descending Example
     max.sort();
