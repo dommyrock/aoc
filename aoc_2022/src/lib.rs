@@ -7,7 +7,7 @@ cargo test -- --nocapture
 mod tests {
     use super::*;
     use std::{
-        collections::{HashMap, HashSet, VecDeque},
+        collections::{BTreeSet, HashMap, HashSet, VecDeque},
         fs::File,
         hash::Hash,
         io::{BufRead, BufReader, Result},
@@ -15,7 +15,28 @@ mod tests {
     };
     const INPUT_PATH: &str = "D:\\Me\\Git\\aoc\\aoc_2022\\src\\inputs";
 
-    macro_rules! batch_create_vec {
+    #[test]
+    fn task6_v2() -> Result<()> {
+        std::fs::read_to_string("./src/inputs/6.txt")?
+            .split("\r\n")
+            .for_each(|line| {
+                let chars: Vec<char> = line.chars().collect();
+                let window_size = 14;
+                let sequence = chars
+                    .windows(window_size)
+                    .enumerate()
+                    // .inspect(|v| {dbg!(v);})
+                    .find(|(_i, slice)| {
+                        let set = slice.iter().collect::<BTreeSet<&char>>();
+                        slice.len() == set.len()
+                    })
+                    .unwrap();
+                println!("Result idx @ {}", (sequence.0 + window_size).to_string())
+            });
+        Ok(())
+    }
+
+    macro_rules! char_vec {
         ($text:expr) => {{
             let mut vec = Vec::new();
             let chars = $text.chars().collect::<Vec<char>>();
@@ -34,15 +55,16 @@ mod tests {
             .split("\r\n")
             .for_each(|line| {
                 for (i, _) in line.chars().enumerate() {
-                    //look back N previous chars
                     let segment_size = 14; //(4 or 14)
+                                           //look back N previous chars
                     if i >= (segment_size - 1) {
-                        let x = batch_create_vec!(line
+                        let x = char_vec!(line
                             .chars()
                             .skip(i - (segment_size - 1))
                             .take(segment_size)
                             .collect::<String>());
-                        if has_all_unique_elements(x) {
+
+                        if all_unique_elements(x) {
                             println!("Resulting N index > {}", i + 1);
                             uniq.clear();
                             return;
@@ -51,8 +73,10 @@ mod tests {
                 }
             });
         Ok(())
-    } 
-    fn has_all_unique_elements<T>(iter: T) -> bool
+        //V2 using windows() https://www.youtube.com/watch?v=pjbW_WvVx2Q
+    }
+
+    fn all_unique_elements<T>(iter: T) -> bool
     where
         T: IntoIterator,
         T::Item: Eq + Hash,
@@ -70,14 +94,14 @@ mod tests {
             taken_slice
         );
 
-        let vec1 = batch_create_vec!("bvwbjplbgvbhsrlpgdmjqwftvncz"
+        let vec1 = char_vec!("bvwbjplbgvbhsrlpgdmjqwftvncz"
             .chars()
             .skip(4)
             .take(4)
             .collect::<String>());
         println!("T2 Out > [{:?}]", vec1);
 
-        let vec2 = batch_create_vec!("mjqjpqmgbljsphdztnvjfqwrcgsmlb"
+        let vec2 = char_vec!("mjqjpqmgbljsphdztnvjfqwrcgsmlb"
             .chars()
             .skip(14)
             .take(14)
