@@ -9,13 +9,136 @@ mod tests {
     use std::{
         collections::{HashMap, HashSet, VecDeque},
         fs::File,
+        hash::Hash,
         io::{BufRead, BufReader, Result},
         ops::RangeInclusive,
     };
     const INPUT_PATH: &str = "D:\\Me\\Git\\aoc\\aoc_2022\\src\\inputs";
 
+    macro_rules! batch_create_vec {
+        ($text:expr) => {{
+            let mut vec = Vec::new();
+            let chars = $text.chars().collect::<Vec<char>>();
+            for c in chars {
+                vec.push(c);
+            }
+            vec
+        }};
+    }
+
     #[test]
-    fn task5() -> Result<()> {
+    // #[ignore]
+    fn task6_1_2() -> Result<()> {
+        let mut uniq: HashSet<char> = HashSet::new();
+        std::fs::read_to_string("./src/inputs/6.txt")?
+            .split("\r\n")
+            .for_each(|line| {
+                for (i, _) in line.chars().enumerate() {
+                    //look back N previous chars
+                    let segment_size = 14; //(4 or 14)
+                    if i >= (segment_size - 1) {
+                        let x = batch_create_vec!(line
+                            .chars()
+                            .skip(i - (segment_size - 1))
+                            .take(segment_size)
+                            .collect::<String>());
+                        if has_all_unique_elements(x) {
+                            println!("Resulting N index > {}", i + 1);
+                            uniq.clear();
+                            return;
+                        }
+                    }
+                }
+            });
+        Ok(())
+    } 
+    fn has_all_unique_elements<T>(iter: T) -> bool
+    where
+        T: IntoIterator,
+        T::Item: Eq + Hash,
+    {
+        let mut uniq = HashSet::new();
+        iter.into_iter().all(move |x| uniq.insert(x))
+    }
+
+    #[test]
+    #[ignore = "macro test"]
+    fn macro_test_2() {
+        let taken_slice: String = "anabella".chars().skip(2).take(3).collect();
+        println!(
+            "T1 taken this {:?} String from slice input 'anabella'",
+            taken_slice
+        );
+
+        let vec1 = batch_create_vec!("bvwbjplbgvbhsrlpgdmjqwftvncz"
+            .chars()
+            .skip(4)
+            .take(4)
+            .collect::<String>());
+        println!("T2 Out > [{:?}]", vec1);
+
+        let vec2 = batch_create_vec!("mjqjpqmgbljsphdztnvjfqwrcgsmlb"
+            .chars()
+            .skip(14)
+            .take(14)
+            .collect::<String>());
+        println!("T2 Out > [{:?}]", vec2);
+    }
+
+    macro_rules! variable_inpt_test {
+        ($($items:expr),+ =>$char_count:expr) => {{// i picked => to mark next macro param
+            let mut vec = Vec::new();
+            let mut counter = $char_count;
+            while counter > 0
+            {
+                $(vec.push($items);)+ // + marks it as repetition on all input (items ) => (can also be * or , or ?)
+                counter -=1;
+            }
+            vec
+        }};
+    }
+
+    #[test]
+    #[ignore = "macro test"]
+    fn macro_test_variable_input() {
+        //need to return (n) [char elements] from macro >Vec
+        let res_char = variable_inpt_test!('1','2','3','4'=>2);
+        let res_i32 = variable_inpt_test!(1,2,3,4=>2);
+        let res_text = variable_inpt_test!("ananannas is great "=>2);
+
+        println!("items {:?}", res_char);
+        println!("items {:?}", res_i32);
+        println!("items {:?}", res_text);
+    }
+
+    #[test]
+    #[ignore]
+    fn task6_bitwise_magic_test() {
+        fn has_repeated_chars(s: &str) -> bool {
+            println!("");
+
+            let mut seen = 0;
+            for c in s.chars() {
+                let mask = 1 << (c as u8 - 'a' as u8);
+                if (seen & mask) != 0 {
+                    // This character has already been seen.
+                    return true;
+                }
+                println!("(before |= mask) let seen = {}", seen);
+                seen |= mask;
+                println!("(after |= mask) let seen = {}", seen);
+            }
+            false
+        }
+
+        // Examples:
+        assert!(has_repeated_chars("hello"));
+        assert!(!has_repeated_chars("world"));
+    }
+
+    #[test]
+    #[ignore]
+    fn task5_1_2() -> Result<()> {
         let index_map: HashMap<usize, i32> = HashMap::from([
             (1, 1),
             (5, 2),
