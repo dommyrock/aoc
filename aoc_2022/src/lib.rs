@@ -16,12 +16,33 @@ mod tests {
     const INPUT_PATH: &str = "D:\\Me\\Git\\aoc\\aoc_2022\\src\\inputs";
 
     #[test]
+    #[ignore="it can get x18 faster if we use single bit for storage?"]
+    fn task6_v3_bitwise() -> Result<()> {
+        let win_size = 14;
+        let res = std::fs::read_to_string("./src/inputs/6.txt")?
+            .as_bytes()
+            .windows(win_size)
+            .position(move |set| {
+                let mut data: u32 = 0;
+                for &c in set {
+                    let prev = data;
+                    data |= 1 << (c - b'a'); //b'a' same as 'a' as u8
+                    if prev == data {
+                        return false;
+                    }
+                }
+                return true;
+            });
+        println!("Result idx => {:?}", res.unwrap() + win_size);
+        Ok(())
+    }
+    #[test]
     fn task6_v2() -> Result<()> {
+        let window_size = 14;
         std::fs::read_to_string("./src/inputs/6.txt")?
             .split("\r\n")
             .for_each(|line| {
                 let chars: Vec<char> = line.chars().collect();
-                let window_size = 14;
                 let sequence = chars
                     .windows(window_size)
                     .enumerate()
@@ -34,6 +55,7 @@ mod tests {
                 println!("Result idx @ {}", (sequence.0 + window_size).to_string())
             });
         Ok(())
+        //windows() demo: https://www.youtube.com/watch?v=pjbW_WvVx2Q
     }
 
     macro_rules! char_vec {
@@ -51,12 +73,12 @@ mod tests {
     // #[ignore]
     fn task6_1_2() -> Result<()> {
         let mut uniq: HashSet<char> = HashSet::new();
+        let segment_size = 14; //(4 or 14)
         std::fs::read_to_string("./src/inputs/6.txt")?
             .split("\r\n")
             .for_each(|line| {
                 for (i, _) in line.chars().enumerate() {
-                    let segment_size = 14; //(4 or 14)
-                                           //look back N previous chars
+                    //look back N previous chars
                     if i >= (segment_size - 1) {
                         let x = char_vec!(line
                             .chars()
@@ -73,7 +95,6 @@ mod tests {
                 }
             });
         Ok(())
-        //V2 using windows() https://www.youtube.com/watch?v=pjbW_WvVx2Q
     }
 
     fn all_unique_elements<T>(iter: T) -> bool
