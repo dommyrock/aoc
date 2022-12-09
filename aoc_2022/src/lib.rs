@@ -5,7 +5,7 @@ cargo test -- --nocapture
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    // use super::*;
     use std::{
         collections::{BTreeSet, HashMap, HashSet, VecDeque},
         fs::File,
@@ -14,10 +14,308 @@ mod tests {
         ops::RangeInclusive,
     };
     const INPUT_PATH: &str = "D:\\Me\\Git\\aoc\\aoc_2022\\src\\inputs";
+    #[test]
+    #[ignore]
+    fn day_9() {
+        (0..4).for_each(|x| print!("{x} ,"));
+        println!("");
+        (0..=4).for_each(|x| print!("{x} ,"));
+        let tr = (0..=4).any(|x| x * 2 == 8);
+        print!("{} ,", tr)
+    }
+    
+    #[test]
+    // #[ignore]
+    fn day_8_2() -> Result<()> {
+        let txt: String = std::fs::read_to_string("./src/inputs/8.txt")?;
+        let y = txt.lines().count();
+        let x = txt
+            .split("\r\n")
+            .into_iter()
+            .take(1)
+            .collect::<String>()
+            .len();
+
+        let mut grid = vec![vec![0; x]; y];
+        //map to matrix
+        let mut row = 0;
+        for ln in txt.lines() {
+            for (idx, c) in ln.chars().enumerate() {
+                //map chars of eaxh line to grid
+                grid[row][idx] = c.to_digit(10).unwrap();
+            }
+            row += 1;
+        }
+
+        let mut result = 0;
+        for (i, row) in grid.iter().enumerate() {
+            //exit @ las row
+            if i == y - 1 {
+                println!("Score {:?}", result);
+                return Ok(());
+            }
+            for (j, _col) in row.iter().enumerate() {
+                //iterate only inner parts
+                if i >= 1 && j >= 1 && j < (x - 1) {
+                    // print!("{:?},", current);
+                    let mut horiz = (0..x).map(|f| grid[i][f]).collect::<Vec<u32>>();
+                    let mut vert = (0..x).map(|f| grid[f][j]).collect::<Vec<u32>>();
+                    //remove current
+                    let _ = horiz.remove(j);
+                    let _ = vert.remove(i);
+
+                    let h_left: Vec<u32> = horiz.drain(0..j).collect();
+                    let v_up: Vec<u32> = vert.drain(0..i).collect();
+
+                    let current = grid[i][j];
+                    //count  visible trees in up,left,bottom,right directions
+
+                    let (mut l, mut r, mut u, mut d) = (0, 0, 0, 0);
+                    //Runtime calculated func
+                    let mut incre_while_less_or_eq = |f: u32, target: char| match target {
+                        'l' => {
+                            if f >= current {
+                                l += 1;
+                                return false;
+                            }
+                            l += 1;
+                            return true;
+                        }
+                        'r' => {
+                            if f >= current {
+                                r += 1;
+                                return false;
+                            }
+                            r += 1;
+                            return true;
+                        }
+                        'u' => {
+                            if f >= current {
+                                u += 1;
+                                return false;
+                            }
+                            u += 1;
+                            return true;
+                        }
+                        'd' => {
+                            if f >= current {
+                                d += 1;
+                                return false;
+                            }
+                            d += 1;
+                            return true;
+                        }
+                        _ => false,
+                    };
+                    let _left = h_left.iter().rev().all(|f| incre_while_less_or_eq(*f, 'l'));
+                    let _right = horiz.iter().all(|f| incre_while_less_or_eq(*f, 'r'));
+                    let _up = v_up.iter().rev().all(|f| incre_while_less_or_eq(*f, 'u'));
+                    let _down = vert.iter().all(|f| incre_while_less_or_eq(*f, 'd'));
+
+                    //update larges
+                    let total = (l * r * u * d);
+                    if total > result {
+                        result = total;
+                    }
+                }
+            }
+        }
+        Ok(())
+        //https://blog.logrocket.com/rust-iterators-closures-deep-dive/
+        //https://stackoverflow.com/questions/65527921/modify-and-return-closure
+    }
 
     #[test]
-    #[ignore="it can get x18 faster if we use single bit for storage?"]
-    fn task6_v3_bitwise() -> Result<()> {
+    #[ignore]
+    fn day_8() -> Result<()> {
+        let txt: String = std::fs::read_to_string("./src/inputs/8.txt")?;
+        let y = txt.lines().count();
+        let x = txt
+            .split("\r\n")
+            .into_iter()
+            .take(1)
+            .collect::<String>()
+            .len();
+
+        //or let mut grid = [[0u8; x]; y]; requires consts
+        let mut grid = vec![vec![0; x]; y];
+        //map to matrix
+        let mut row = 0;
+        for ln in txt.lines() {
+            for (idx, c) in ln.chars().enumerate() {
+                //map chars of eaxh line to grid
+                grid[row][idx] = c.to_digit(10).unwrap();
+            }
+            row += 1;
+        }
+
+        let mut res: Vec<u32> = Vec::new();
+        for (i, row) in grid.iter().enumerate() {
+            //last iter row reached
+            if i == y - 1 {
+                println!("Exited @ j={}", i);
+                println!(
+                    "Invisible trees >{:?}, Result = {}",
+                    res,
+                    (x * y - res.len())
+                );
+                return Ok(());
+            }
+            // println!("i is ={}", grid[i][0]);
+            for (j, _col) in row.iter().enumerate() {
+                //iterate only inner parts
+                if i >= 1 && j >= 1 && j < (x - 1) {
+                    let mut horiz = (0..x).map(|f| grid[i][f]).collect::<Vec<u32>>();
+                    let mut vert = (0..x).map(|f| grid[f][j]).collect::<Vec<u32>>();
+
+                    //remove current
+                    let _ = horiz.remove(j);
+                    let _ = vert.remove(i);
+                    let h_left: Vec<u32> = horiz.drain(0..j).collect();
+                    let v_up: Vec<u32> = vert.drain(0..i).collect();
+
+                    let current = grid[i][j];
+
+                    let invisible_horiz = h_left.into_iter().any(|a| a >= current)
+                        && horiz.into_iter().any(|a| a >= current);
+                    let invisible_vert = v_up.into_iter().any(|a| a >= current)
+                        && vert.into_iter().any(|a| a >= current);
+
+                    println!("invis h[{invisible_horiz}], invis v[{invisible_vert}]");
+                    if invisible_horiz && invisible_vert {
+                        res.push(current);
+                    }
+                }
+            }
+            println!("");
+        }
+        Ok(())
+        //https://stackoverflow.com/questions/13212212/creating-two-dimensional-arrays-in-rust
+    }
+
+    #[test]
+    #[ignore]
+    fn day7_v2() -> Result<()> {
+        let lines: String = std::fs::read_to_string("./src/inputs/7.txt")?;
+        let (mut cmds, mut children): (Vec<&str>, Vec<&str>) = (vec![], vec![]);
+        //read the commands first , remove them from lines
+        lines
+            .split("\r\n")
+            .skip(2)
+            .into_iter()
+            .enumerate()
+            .for_each(|(i, ln)| {
+                if ln.starts_with('$') {
+                    cmds.push(ln);
+                } else {
+                    children.push(ln);
+                }
+            });
+        cmds.iter().for_each(|c| println!("{:?}", c));
+        println!("");
+        children.iter().for_each(|c| println!("{:?}", c));
+
+        /*
+        Do the same as they did in bellow visual example
+            MUTATE THE MAIN INPUT STRING WITH " " SPACING when i cd
+            remove " " when cd ..
+        */
+
+        Ok(())
+    }
+
+    #[test]
+    #[ignore]
+    fn day7() -> Result<()> {
+        //stack (directory, children) =child = everything after ls - all commands
+        let mut stack: Vec<(&str, Vec<&str>)> = vec![
+            // ("/", children)
+        ];
+        // let lines: Vec<&str> = ;
+        let main: String = std::fs::read_to_string("./src/inputs/7.txt")?;
+
+        let root_children = main
+            .split("\r\n")
+            .into_iter()
+            .filter(|x| !x.starts_with('$'))
+            .collect::<Vec<&str>>();
+        stack.push(("/", root_children));
+
+        println!("{:?}", stack);
+
+        let cd_cmds: Vec<&str> = main
+            .split("\r\n")
+            .into_iter()
+            .filter(|x| !x.starts_with("$ cd"))
+            .collect();
+
+        // recurse(std::fs::read_to_string("./src/inputs/7.txt")?
+        // .split("\r\n")
+        // .collect(),stack);
+
+        Ok(())
+
+        /*
+        help
+        https://stackoverflow.com/questions/44662312/how-to-filter-a-vector-of-custom-structs
+        https://stackoverflow.com/questions/63011873/replace-if-condition-by-match
+        */
+    }
+    fn recurse(lines: Vec<&str>, mut stack: Vec<(&str, Vec<&str>)>) {
+        let cloned = lines.clone();
+        // let cleaned =lines.iter().filter(|ln| )
+
+        //list all children
+        // println!("Cleaned: > {:?}",cleaned);
+        //recurse
+
+        ()
+    }
+    //v1 (missing depths and braincells)
+    // let mut map: BTreeMap<String, Vec<i32>> = BTreeMap::new();
+    // let mut cur_dir: Vec<String> = vec![];
+    // for ln in std::fs::read_to_string("./src/inputs/7.txt")?.split("\r\n") {
+    //     //dir abc or 123132 file.txt
+    //     if !ln.starts_with('$') {
+    //         if let Some(next) = ln.split_whitespace().next() {
+    //             if let Ok(parsed) = next.parse::<i32>() {
+    //                 map.entry(cur_dir.last().cloned().unwrap())
+    //                     .or_insert(vec![])
+    //                     .push(parsed);
+    //             }
+    //         }
+    //     } else {
+    //         //$ cd abc
+    //         if !ln.starts_with("$ cd ..") && !ln.starts_with("$ ls") {
+    //             let dir_name = ln.split_whitespace().last().unwrap();
+    //             cur_dir.push(String::from(dir_name));
+    //         }
+    //     }
+    // }
+    // map.iter()
+    //     .for_each(|(k, v)| println!("Map Key: {} Val sum: {:?}", k, v.iter().sum::<i32>()));
+    // // let mut sorted_dir_sums: Vec<i32> = map
+    // //     .values()
+    // //     .map(|set| set.iter().sum::<i32>())
+    // //     .into_iter()
+    // //     .collect();
+    // // sorted_dir_sums.sort();
+    // // println!("Sorted: {:?}\n", sorted_dir_sums);
+    // // let kkk = map
+    // //     .values()
+    // //     .map(|set| set.iter().sum::<i32>())
+    // //     .filter(|x| *x <= 100_000)
+    // //     .collect::<Vec<i32>>();
+    // // for x in sorted_dir_sums {
+    // //     if x <= 100_000 {
+    // //         println!("x == {x}");
+    // //         sol += x;
+    // //     }
+    // // }//1275893 To low
+
+    #[test]
+    #[ignore = "it can get x18 faster if we use single bit for storage?"]
+    fn day6_v3_bitwise() -> Result<()> {
         let win_size = 14;
         let res = std::fs::read_to_string("./src/inputs/6.txt")?
             .as_bytes()
@@ -37,7 +335,8 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn task6_v2() -> Result<()> {
+    #[ignore]
+    fn day6_v2() -> Result<()> {
         let window_size = 14;
         std::fs::read_to_string("./src/inputs/6.txt")?
             .split("\r\n")
@@ -70,8 +369,8 @@ mod tests {
     }
 
     #[test]
-    // #[ignore]
-    fn task6_1_2() -> Result<()> {
+    #[ignore]
+    fn day6_1_2() -> Result<()> {
         let mut uniq: HashSet<char> = HashSet::new();
         let segment_size = 14; //(4 or 14)
         std::fs::read_to_string("./src/inputs/6.txt")?
@@ -158,7 +457,7 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn task6_bitwise_magic_test() {
+    fn day6_bitwise_magic() {
         fn has_repeated_chars(s: &str) -> bool {
             println!("");
 
@@ -183,7 +482,7 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn task5_1_2() -> Result<()> {
+    fn day5_1_2() -> Result<()> {
         let index_map: HashMap<usize, i32> = HashMap::from([
             (1, 1),
             (5, 2),
@@ -257,7 +556,7 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn task4_1_2() -> Result<()> {
+    fn day4_1_2() -> Result<()> {
         let (mut overlap2, mut overlap1) = (0, 0);
         let range_pairs: Vec<Vec<i32>> = include_str!("./inputs/4.txt")
             .split("\r\n")
@@ -313,7 +612,7 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn task3_2() -> Result<()> {
+    fn day3_2() -> Result<()> {
         let mut sum = 0;
         let (dict_l, dict_u) = get_hashsets([('a'..='z'), ('A'..='Z')]);
 
@@ -342,7 +641,7 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn task3() -> Result<()> {
+    fn day3() -> Result<()> {
         let mut score = 0;
         let (dict_l, dict_u) = get_hashsets([('a'..='z'), ('A'..='Z')]);
 
@@ -407,7 +706,7 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn task2_2() -> Result<()> {
+    fn day2_2() -> Result<()> {
         let f = File::open(format!("{INPUT_PATH}\\{}.txt", 2))?;
         let mut score = 0;
         for ln in BufReader::new(f).lines() {
@@ -438,7 +737,7 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn task2() -> Result<()> {
+    fn day2() -> Result<()> {
         let f = File::open(format!("{INPUT_PATH}\\{}.txt", 2))?;
         let mut score = 0;
         for ln in BufReader::new(f).lines() {
@@ -462,7 +761,7 @@ mod tests {
     }
     #[test]
     #[ignore]
-    fn task1_2_prime() -> Result<()> {
+    fn day1_2_prime() -> Result<()> {
         let mut max = include_str!("./inputs/1.txt")
             .split("\r\n\r\n") //on linux it's \n\n
             .map(|x| {
@@ -478,7 +777,7 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn task1_2() -> Result<()> {
+    fn day1_2() -> Result<()> {
         let f = File::open(format!("{INPUT_PATH}\\{}.txt", 1))?;
         let reader = BufReader::new(f);
 
@@ -504,7 +803,7 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn task1() -> Result<()> {
+    fn day1() -> Result<()> {
         let f = File::open(format!("{INPUT_PATH}\\{}.txt", 1))?;
         let reader = BufReader::new(f);
         let mut res = 0;
