@@ -14,18 +14,65 @@ mod tests {
         ops::RangeInclusive,
     };
     const INPUT_PATH: &str = "D:\\Me\\Git\\aoc\\aoc_2022\\src\\inputs";
+
+    #[derive(Debug, Clone, Copy)]
+    enum Command {
+        Left,
+        Right,
+        Up,
+        Down,
+    }
+    fn pos_to_enum(chr: char) -> Option<Command> {
+        match chr {
+            'L' => Some(Command::Left),
+            'R' => Some(Command::Right),
+            'U' => Some(Command::Up),
+            'D' => Some(Command::Down),
+            _ => None,
+        }
+    }
+    fn map_to_list(element: &(Command, u32)) -> Vec<Command> {
+        (0..element.1).into_iter().map(|_| element.0).collect()
+    }
     #[test]
-    #[ignore]
-    fn day_9() {
+    fn day9() -> Result<()> {
+        //store positions only once with hashset
+        let mut tail_positions: HashSet<u32> = HashSet::new();
+        let commands: Vec<Command> = std::fs::read_to_string("./src/inputs/9.txt")?
+            .lines()
+            .map(|ln| {
+                let mut split = ln.split_whitespace();
+                (
+                    pos_to_enum(split.next().unwrap().parse::<char>().unwrap()).unwrap(),
+                    split.next().unwrap().parse::<u32>().unwrap(),
+                )
+            })
+            .into_iter()
+            .flat_map(|x| map_to_list(&x))
+            .rev()
+            .collect();
+        //Validate input
+        commands.iter().for_each(|x| println!(": {:?}", x));
+
+        //TODO
+        // Execute commands in order
+        // commands.po
+
+        Ok(())
+    }
+
+    #[test]
+    #[ignore = "foreach"]
+    fn range_foreach() {
         (0..4).for_each(|x| print!("{x} ,"));
         println!("");
         (0..=4).for_each(|x| print!("{x} ,"));
         let tr = (0..=4).any(|x| x * 2 == 8);
         print!("{} ,", tr)
     }
-    
+
     #[test]
-    // #[ignore]
+    #[ignore]
     fn day_8_2() -> Result<()> {
         let txt: String = std::fs::read_to_string("./src/inputs/8.txt")?;
         let y = txt.lines().count();
