@@ -35,7 +35,7 @@ mod tests {
         (0..element.1).into_iter().map(|_| element.0).collect()
     }
     #[test]
-    #[ignore]
+    // #[ignore]
     fn day9() -> Result<()> {
         let mut tail_positions: HashSet<u32> = HashSet::new();
         let mut commands: Vec<Command> = std::fs::read_to_string("./src/inputs/9.txt")? //1 Vec<(Command, u32)>
@@ -59,6 +59,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn day9_demo() -> Result<()> {
         //store positions only once with hashset
         // let mut tail_positions: HashSet<u32> = HashSet::new();
