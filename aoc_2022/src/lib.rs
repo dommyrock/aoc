@@ -36,10 +36,10 @@ mod tests {
     }
     #[test]
     fn day9() -> Result<()> {
-        //store positions only once with hashset
         let mut tail_positions: HashSet<u32> = HashSet::new();
-        let commands: Vec<Command> = std::fs::read_to_string("./src/inputs/9.txt")?
+        let mut commands: Vec<Command> = std::fs::read_to_string("./src/inputs/9.txt")? //1 Vec<(Command, u32)>
             .lines()
+            .rev() //Rev so i can execute as in example by pop()
             .map(|ln| {
                 let mut split = ln.split_whitespace();
                 (
@@ -47,18 +47,103 @@ mod tests {
                     split.next().unwrap().parse::<u32>().unwrap(),
                 )
             })
-            .into_iter()
             .flat_map(|x| map_to_list(&x))
-            .rev()
             .collect();
-        //Validate input
+            
+        println!("count: {}", commands.len());
         commands.iter().for_each(|x| println!(": {:?}", x));
 
-        //TODO
-        // Execute commands in order
-        // commands.po
 
         Ok(())
+    }
+
+    #[test]
+    fn day9_demo() -> Result<()> {
+        //store positions only once with hashset
+        // let mut tail_positions: HashSet<u32> = HashSet::new();
+        let mut commands: Vec<Command> = std::fs::read_to_string("./src/inputs/9.txt")? //1 Vec<(Command, u32)>
+            .lines()
+            .rev() //Rev so i can execute as in example by pop()
+            .map(|ln| {
+                let mut split = ln.split_whitespace();
+                (
+                    pos_to_enum(split.next().unwrap().parse::<char>().unwrap()).unwrap(),
+                    split.next().unwrap().parse::<u32>().unwrap(),
+                )
+            })
+            .flat_map(|x| map_to_list(&x))
+            .collect();
+        //Print parsed data
+        println!("count: {}", commands.len());
+        commands.iter().for_each(|x| println!(": {:?}", x));
+
+        //Print grid with executed commands
+        let (w, h) = (9, 9);
+        let mut grid: Vec<Vec<char>> = vec![vec!['.'; w]; h];
+        //state
+        let (mut row, mut col) = (8, 0);
+        grid[row][col] = 's';
+        while commands.len() > 0 {
+            let cmd = commands.pop().unwrap();
+            match cmd {
+                Command::Left => {
+                    col = col - 1;
+                    grid[row][col] = 'L';
+                }
+                Command::Right => {
+                    col = col + 1;
+                    grid[row][col] = 'R';
+                }
+                Command::Up => {
+                    row = row - 1;
+                    grid[row][col] = 'U';
+                }
+                Command::Down => {
+                    row = row + 1;
+                    grid[row][col] = 'D';
+                }
+            }
+        }
+        for row in 0..h {
+            for col in 0..w {
+                let cur = grid[row][col];
+                print!("{} ", cur);
+            }
+            println!("");
+        }
+        Ok(())
+    }
+
+    #[test]
+    #[ignore]
+    fn crete_and_mutate_2d_array() {
+        let (w, h) = (29, 30);
+        let mut grid: Vec<Vec<char>> = vec![vec!['.'; w]; h];
+        // grid[14][14] = 's';
+
+        for row in 0..h {
+            for col in 0..w {
+                let cur = grid[row][col];
+                //test access----------
+                if col == 3 || col == w - 4 {
+                    print!("{} ", '3');
+                    continue;
+                }
+                if row == 1 || row == h - 2 {
+                    print!("{} ", '1');
+                    continue;
+                }
+                if row == h - 1 && col == 0 {
+                    grid[row][col] = 's';
+                    print!("{} ", 'S');
+                    continue;
+                }
+                //test access----------
+                //default to '.'
+                print!("{} ", cur);
+            }
+            println!("");
+        }
     }
 
     #[test]
