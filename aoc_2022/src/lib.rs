@@ -35,6 +35,7 @@ mod tests {
         (0..element.1).into_iter().map(|_| element.0).collect()
     }
     #[test]
+    #[ignore]
     fn day9() -> Result<()> {
         let mut tail_positions: HashSet<u32> = HashSet::new();
         let mut commands: Vec<Command> = std::fs::read_to_string("./src/inputs/9.txt")? //1 Vec<(Command, u32)>
@@ -61,7 +62,7 @@ mod tests {
     fn day9_demo() -> Result<()> {
         //store positions only once with hashset
         // let mut tail_positions: HashSet<u32> = HashSet::new();
-        let mut commands: Vec<Command> = std::fs::read_to_string("./src/inputs/9.txt")? //1 Vec<(Command, u32)>
+        let mut commands: Vec<Command> = std::fs::read_to_string("./src/inputs/10.txt")? //1 Vec<(Command, u32)>
             .lines()
             .rev() //Rev so i can execute as in example by pop()
             .map(|ln| {
@@ -78,10 +79,10 @@ mod tests {
         commands.iter().for_each(|x| println!(": {:?}", x));
 
         //Print grid with executed commands
-        let (w, h) = (9, 9);
+        let (w, h) = (4999, 4999);
         let mut grid: Vec<Vec<char>> = vec![vec!['.'; w]; h];
         //state
-        let (mut row, mut col) = (8, 0);
+        let (mut row, mut col) = (w, h);
         grid[row][col] = 's';
         while commands.len() > 0 {
             let cmd = commands.pop().unwrap();
