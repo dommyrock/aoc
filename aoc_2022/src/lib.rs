@@ -12,8 +12,138 @@ mod tests {
         hash::Hash,
         io::{BufRead, BufReader, Result},
         ops::RangeInclusive,
+        vec,
     };
     const INPUT_PATH: &str = "D:\\Me\\Git\\aoc\\aoc_2022\\src\\inputs";
+    #[test]
+    fn day11() -> Result<()> {
+        let binding = std::fs::read_to_string("./src/inputs/11.txt")?;
+        let mut commands = binding.lines().collect::<Vec<&str>>();
+
+        //parse input into Monkey struct
+        //with some impl on struct with fn throw() ...
+        
+        Ok(())
+    }
+
+    #[test]
+    // #[ignore]
+    fn day10_2() -> Result<()> {
+        let binding = std::fs::read_to_string("./src/inputs/10.txt")?;
+        let mut commands = binding.lines().rev().collect::<Vec<&str>>();
+
+        let mut register: i32 = 1;
+        let mut cycle: u32 = 1;
+        let mut queue: Vec<i32> = vec![];
+        let mut crt_row: Vec<char> = (0..40).map(|_| '_').collect();
+
+        while commands.len() > 0 {
+            let sprite_position: u32 = recalc_position(cycle) - 1;
+            let crt_3px = vec![register - 1, register, register + 1];
+
+            //END OF CRT ROW (241 never reached) or cycle % 40 == 0
+            if [41, 81, 121, 161, 201, 240].iter().any(|c| *c == cycle) {
+                for r in crt_row {
+                    print!("{}", r);
+                }
+                print!("\n");
+                crt_row = (0..40).map(|_| '_').collect();
+            }
+
+            //render
+            if crt_3px.iter().any(|px| *px == sprite_position as i32) {
+                crt_row[sprite_position as usize] = '#';
+            } else {
+                crt_row[sprite_position as usize] = '.';
+            }
+
+            //Register command
+            if queue.is_empty() {
+                let mut iter = commands.pop().unwrap().split_whitespace();
+                if let Some(_) = iter.next() {
+                    if let Some(add) = iter.next() {
+                        queue.push(add.parse::<i32>().unwrap());
+                        cycle += 1;
+                        continue;
+                    }
+                }
+            }
+            //pop executed cmd in its 2nd cycle
+            if let Some(amount) = queue.pop() {
+                register += amount;
+            }
+            cycle += 1;
+        }
+        Ok(())
+        /*
+        If the sprite is positioned such that one of its three pixels is the pixel currently being drawn,
+        the screen produces a lit pixel (#); otherwise, the screen leaves the pixel dark (.)
+        SOLUTION V2: Another solution could be replacing queue with "wait" flag that checks when to update register
+        ```
+            match cmd {
+            "noop" => (),
+            c if c == "addx" && wait == 0 => register += amount,
+            _ => wait -= 1,
+            }
+        ```
+        */
+    }
+    fn recalc_position(cycle: u32) -> u32 {
+        match cycle {
+            c if c <= 40 => cycle,
+            c if c > 40 && c <= 80 => cycle - 40,
+            c if c > 80 && c <= 120 => cycle - 80,
+            c if c > 120 && c <= 160 => cycle - 120,
+            c if c > 160 && c <= 200 => cycle - 160,
+            c if c > 200 && c <= 240 => cycle - 200,
+            _ => 0,
+        }
+        //https://stackoverflow.com/questions/47852269/can-i-use-and-in-match
+    }
+    #[test]
+    #[ignore]
+    fn day10() -> Result<()> {
+        let binding = std::fs::read_to_string("./src/inputs/10.txt")?;
+        //rev because i want to pop commands in order
+        let mut commands = binding.lines().rev().collect::<Vec<&str>>();
+
+        let mut queue: Vec<i32> = vec![];
+        let mut register: i32 = 1;
+        let mut cycle: u32 = 1;
+        let mut results: Vec<i32> = vec![];
+
+        while commands.len() > 0 {
+            match cycle {
+                20 => results.push(register * 20),
+                60 => results.push(register * 60),
+                100 => results.push(register * 100),
+                140 => results.push(register * 140),
+                180 => results.push(register * 180),
+                220 => results.push(register * 220),
+                _ => (),
+            }
+            //Register command
+            if queue.is_empty() {
+                let mut iter = commands.pop().unwrap().split_whitespace();
+                if let Some(_) = iter.next() {
+                    // cmd = x;
+                    if let Some(add) = iter.next() {
+                        queue.push(add.parse::<i32>().unwrap());
+                        cycle += 1;
+                        continue;
+                    }
+                }
+            }
+            //pop executed cmd in its 2nd cycle
+            if let Some(amount) = queue.pop() {
+                register += amount;
+            }
+            cycle += 1;
+        }
+
+        println!("Result {:?}", results.iter().sum::<i32>());
+        Ok(())
+    }
 
     #[derive(Debug, Clone, Copy)]
     enum Command {
@@ -35,9 +165,9 @@ mod tests {
         (0..element.1).into_iter().map(|_| element.0).collect()
     }
     #[test]
-    // #[ignore]
+    #[ignore]
     fn day9() -> Result<()> {
-        let mut tail_positions: HashSet<u32> = HashSet::new();
+        let mut tail_positions: HashSet<(usize, usize)> = HashSet::new();
         let mut commands: Vec<Command> = std::fs::read_to_string("./src/inputs/9.txt")? //1 Vec<(Command, u32)>
             .lines()
             .rev() //Rev so i can execute as in example by pop()
@@ -50,11 +180,81 @@ mod tests {
             })
             .flat_map(|x| map_to_list(&x))
             .collect();
-            
+
         println!("count: {}", commands.len());
-        commands.iter().for_each(|x| println!(": {:?}", x));
+        // commands.iter().for_each(|x| println!(": {:?}", x));
 
+        let (w, h) = (1000, 1000);
+        let mut virtual_grid: Vec<Vec<char>> = vec![vec!['.'; w]; h];
+        //state
+        let (mut head_row, mut head_col) = (499, 499);
+        let (mut tail_row, mut tail_col) = (499, 499);
 
+        /*
+         TODO
+             update head than update both in next
+             for head check on position of head before updating it's position
+             samples:
+        [8][10]_ _[8][12]
+                  |
+             s _ _|[10][12]
+
+             _ x _
+                  x
+             s x _|
+                 [Row][Col]
+             1 H [10][10] + R = [10][11]  T [10][10]  |0
+             2 H [10][11] + R = [10][12]  T [10][11]  |row dif =1
+
+             3 H [10][11] + U = [9][12]   T [10][11]  |0
+             4 H [9][12] + U =  [8][12]   T  [9][12]  |col dif =1
+
+             5 H [8][12] + L =  [8][11]   T  [9][12]   |0
+             6 H [8][12] + L =  [8][10]   T  [8][11]   |row dif =1
+         */
+
+        let mut cycle = 0;
+        while commands.len() > 0 {
+            let cmd = commands.pop().unwrap();
+            match cmd {
+                Command::Left => {
+                    head_col = head_col - 1;
+                    //check Head position before inserting tail position
+                    //and if row || col diff >1 , than move tail and insert position
+                    if cycle > 0 && (head_row - tail_row > 1) || (head_col - tail_col > 1) {
+                        tail_col = tail_col - 1;
+                        tail_positions.insert((tail_col, tail_col));
+                    }
+                }
+                Command::Right => {
+                    head_col = head_col + 1;
+                    //check Head position before inserting tail position
+                    if cycle > 0 && (head_row - tail_row > 1) || (head_col - tail_col > 1) {
+                        tail_col = tail_col + 1;
+                        tail_positions.insert((tail_col, tail_col));
+                    }
+                }
+                Command::Up => {
+                    head_row = head_row - 1;
+                    //check Head position before inserting tail position
+                    if cycle > 0 && (head_row - tail_row > 1) || (head_col - tail_col > 1) {
+                        tail_col = tail_row - 1;
+                        tail_positions.insert((head_row, tail_col));
+                    }
+                }
+                Command::Down => {
+                    head_row = head_row + 1;
+                    //check Head position before inserting tail position
+                    if cycle > 0 && (head_row - tail_row > 1) || (head_col - tail_col > 1) {
+                        tail_col = tail_row + 1;
+                        tail_positions.insert((tail_col, tail_col));
+                    }
+                }
+            }
+            cycle += 1; //deplay 1 cycle for tail
+        }
+        //7389 total command count was to high as expected (right one is about 6k)
+        println!("tail position count: {}", tail_positions.len());
         Ok(())
     }
 
@@ -83,7 +283,7 @@ mod tests {
         let (w, h) = (9, 9);
         let mut grid: Vec<Vec<char>> = vec![vec!['.'; w]; h];
         //state
-        let (mut row, mut col) = (8,0);
+        let (mut row, mut col) = (8, 0);
         grid[row][col] = 's';
         while commands.len() > 0 {
             let cmd = commands.pop().unwrap();
