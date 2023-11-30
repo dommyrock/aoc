@@ -24,3 +24,7 @@ cargo build --bin part1
 ```shell
 cargo flamegraph --bin=part1 -o ../flamegraphs/day-01-part1.svg
 ```
+
+
+### NOTE
+Inputs files are excluded from git like seen in .gitignore > day-*/src/bin/input*
