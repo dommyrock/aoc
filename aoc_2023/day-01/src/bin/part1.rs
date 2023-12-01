@@ -1,38 +1,38 @@
 fn main() {
-    solution();
+    day_1_part1();
     // solution_2();
 }
-fn solution() {
-    let input = include_str!("./input1.txt");
+fn day_1_part1() {
     let mut res = Vec::<u32>::new();
+    include_str!("./input1.txt")
+        .lines()
+        .into_iter()
+        .for_each(|line| {
+            let mut l: (usize, u32) = (0, 0); //ix,n
+            let mut r: (usize, u32) = (0, 0);
 
-    input.lines().into_iter().for_each(|line| {
-        let mut l: (usize, u32) = (0, 0); //ix,n
-        let mut r: (usize, u32) = (0, 0);
-
-        //left
-        for (ix, c) in line.chars().enumerate() {
-            if c.is_digit(10) {
-                l = (ix, c.to_digit(10).unwrap());
-                break;
+            //left
+            for (ix, c) in line.chars().enumerate() {
+                if c.is_digit(10) {
+                    l = (ix, c.to_digit(10).unwrap());
+                    break;
+                }
             }
-        }
-        //right
-        for (ix, c) in line.chars().rev().enumerate() {
-            if c.is_digit(10) {
-                r = (ix, c.to_digit(10).unwrap());
-                break;
+            //right
+            for (ix, c) in line.chars().rev().enumerate() {
+                if c.is_digit(10) {
+                    r = (ix, c.to_digit(10).unwrap());
+                    break;
+                }
             }
-        }
-        res.push(format!("{}{}", l.1, r.1).parse().unwrap());
-    });
+            res.push(format!("{}{}", l.1, r.1).parse().unwrap());
+        });
     println!("{:?}", res.iter().sum::<u32>());
 }
 
 fn solution_2() {
-    let input = include_str!("./input1.txt");
     let mut res = Vec::<usize>::new();
-    input.lines().for_each(|line| {
+    include_str!("./input1.txt").lines().for_each(|line| {
         let digits: Vec<(usize, usize)> = line
             .chars()
             .enumerate()
