@@ -20,9 +20,9 @@ fn main() {
 
         for (ix, c) in line.chars().enumerate() {
             if c.is_digit(10) {
-                if l.0 == 0 && l.1 == 0 {
+                if l.0 == 0 && l.1 == 0 {//no assignments on LEFT
                     l = (ix, c.to_digit(10).unwrap());
-                } else {
+                } else { //assign next trailing to RIGH
                     r = (ix, c.to_digit(10).unwrap());
                 }
             }

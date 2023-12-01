@@ -1,9 +1,10 @@
 fn main() {
     solution();
+    // solution_2();
 }
 fn solution() {
     let input = include_str!("./input1.txt");
-    let mut res = Vec::<i32>::new();
+    let mut res = Vec::<u32>::new();
 
     input.lines().into_iter().for_each(|line| {
         let mut l: (usize, u32) = (0, 0); //ix,n
@@ -25,7 +26,27 @@ fn solution() {
         }
         res.push(format!("{}{}", l.1, r.1).parse().unwrap());
     });
-    println!("{:?}", res.iter().sum::<i32>());
+    println!("{:?}", res.iter().sum::<u32>());
+}
+
+fn solution_2() {
+    let input = include_str!("./input1.txt");
+    let mut res = Vec::<usize>::new();
+    input.lines().for_each(|line| {
+        let digits: Vec<(usize, usize)> = line
+            .chars()
+            .enumerate()
+            .filter_map(|(ix, c)| c.to_digit(10).map(|n| (ix, n as usize)))
+            .collect();
+
+        let (l, r) = match digits.as_slice() {
+            [] => ((0, 0), (0, 0)),
+            [single] => (*single, *single),
+            [first, .., last] => (*first, *last),
+        };
+        res.push(format!("{}{}", l.1, r.1).parse().unwrap());
+    });
+    println!("{:?}", res.iter().sum::<usize>());
 }
 
 fn test_fn(input: &str) -> String {
