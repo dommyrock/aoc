@@ -43,3 +43,19 @@ struct Data {
     times: Vec<usize>,
     distances: Vec<usize>,
 }
+
+/*another way 
+
+deferred this algorithm from the "quadratic equation roots formula"
+
+fn get_possible_ways_to_win(time: usize, distance: usize) -> usize {
+    let d = time * time - 4 * distance;
+    let sqrt_d = (d as f64).sqrt() as usize;
+
+    if sqrt_d * sqrt_d == d {
+        sqrt_d - 1
+    } else {
+        sqrt_d + 1 - (time & 1).bitxor(sqrt_d & 1)
+    }
+}
+*/

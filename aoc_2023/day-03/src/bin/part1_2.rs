@@ -91,8 +91,8 @@ fn main() {
     println!(
         "Part numbers sum: {}",
         part_numbers.iter().map(|pn| pn.num).sum::<u32>()
-    );
-    println!("Gear ratio sum: {gear_ratio_sum}");
+    );//part1
+    println!("Gear ratio sum: {gear_ratio_sum}");//part2
 }
 
 //cc https://github.com/Ununoctium117/aoc2023/blob/main/day3/src/main.rs
