@@ -23,9 +23,10 @@ fn main() {
     let mut steps: u64 = 0;
     let ptr: String = "AAA".to_string();
     find_end(&mut it, &hmap, ptr, &mut steps);
-
+    
     println!("steps {steps}");
 }
+
 fn find_end<'a>(
     it: &mut std::iter::Cycle<std::slice::Iter<'a, char>>,
     map: &BTreeMap<&str, (&str, &str)>,
@@ -38,14 +39,12 @@ fn find_end<'a>(
             'L' => {
                 *steps += 1;
                 let k = map.get(key.as_str()).unwrap().0;
-                // println!("L k {k}");
                 key = k.to_string(); // Update key for the next iteration
             }
             'R' => {
                 *steps += 1;
                 let k = map.get(key.as_str()).unwrap().1;
-                // println!("R k {k}");
-                key = k.to_string(); // Update key for the next iteration
+                key = k.to_string();
             }
             _ => panic!("NEVER"),
         }
@@ -53,6 +52,7 @@ fn find_end<'a>(
     let elapsed = start.elapsed();
     println!("ZZZ hit , elapsed {:?}", elapsed);
 }
+
 ///In this function signature, 'a is a lifetime parameter that ensures the iterator’s lifetime is tied to the slice it’s iterating over.
 ///
 /// The std::iter::Cycle type is a struct that wraps an iterator to make it cycle indefinitely.
