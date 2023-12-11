@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 macro_rules! sequence_differences {
     ($vec:expr) => {{
         let mut differences = Vec::new();
@@ -10,6 +12,7 @@ macro_rules! sequence_differences {
     }};
 }
 fn main() {
+    let start = Instant::now();
     let mut sum: i32 = 0;
     include_str!("input.txt")
         .lines()
@@ -30,6 +33,7 @@ fn main() {
         });
 
     println!("result {sum}");
+    println!("Elapsed : {:?}",start.elapsed());
 }
 fn calc_right(mut v: Vec<i32>) -> i32 {
     let mut result: Vec<i32> = Vec::new();
