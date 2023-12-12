@@ -3,7 +3,7 @@ struct Galaxy {
     x: u64,
     y: u64,
 }
-const EXPAND: u64 = 999_999;//because we count galaxy as dist 1
+const EXPAND: u64 = 999_999; //because we count galaxy as dist 1
 
 fn main() {
     let input = include_str!("input.txt");
@@ -26,32 +26,32 @@ fn main() {
         })
         .collect::<Vec<Galaxy>>();
 
-    let x_es = coords.iter().map(|c| c.x).collect::<Vec<u64>>();
-    let y_es = coords.iter().map(|c| c.y).collect::<Vec<u64>>();
+    let x_gallaxy_coords = coords.iter().map(|c| c.x).collect::<Vec<u64>>();
+    let y_galaxy_coords = coords.iter().map(|c| c.y).collect::<Vec<u64>>();
 
     //compute expansions x,y coord
     let x_expanded = (0..width)
         .filter_map(|y| u64::try_from(y).ok())
-        .filter(|y| !x_es.contains(y))
+        .filter(|y| !x_gallaxy_coords.contains(y))
         .collect::<Vec<u64>>();
     let y_expanded = (0..height)
         .filter_map(|y| u64::try_from(y).ok())
-        .filter(|y| !y_es.contains(y))
+        .filter(|y| !y_galaxy_coords.contains(y))
         .collect::<Vec<u64>>();
 
-    let x_gt_than_any = |x: u64| x_expanded.iter().filter(|&&x_expand| x > x_expand).count() as u64;
-    let y_gt_than_any = |y: u64| y_expanded.iter().filter(|&&y_expand| y > y_expand).count() as u64;
+    let x_gt_than = |x: u64| x_expanded.iter().filter(|&&x_expand| x > x_expand).count() as u64;
+    let y_gt_than = |y: u64| y_expanded.iter().filter(|&&y_expand| y > y_expand).count() as u64;
 
     //mutate coord positions
     coords.iter_mut().for_each(|coord| {
-        coord.x += x_gt_than_any(coord.x) * EXPAND;
-        coord.y += y_gt_than_any(coord.y) * EXPAND;
+        coord.x += x_gt_than(coord.x) * EXPAND;
+        coord.y += y_gt_than(coord.y) * EXPAND;
     });
+
     let mut sum = 0;
     for i in 0..coords.len() {
         for j in i + 1..coords.len() {
             let (g1, g2) = (&coords[i], &coords[j]);
-
             sum += grid_distance(g1.x as i64, g1.y as i64, g2.x as i64, g2.y as i64);
         }
     }
