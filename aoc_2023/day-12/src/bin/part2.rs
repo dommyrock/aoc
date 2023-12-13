@@ -58,17 +58,19 @@ fn count(config: &str, nums: Vec<u32>,cache: &mut HashMap<(String,Vec<u32>),u64>
 
    //"#?" if we see # or ? being turned into #
    if "#?".contains(config.chars().nth(0).unwrap()) {
+       let num_springs = nums[0] as usize;
+       
        //IF there are enough springs left
        if nums[0] <= config.len() as u32
        //IF the first N springs are all broken
-       && !config[..nums[0] as usize].contains(".")
+       && !config[..num_springs].contains(".")
        //3 next spring afterwards doesnt exist or we reached the END OF THE ROW
        && (nums[0] == config.len() as u32 
        //4 OR next one is operational to separate the blocks
-       || config.chars().nth(nums[0] as usize).unwrap() != '#')
+       || config.chars().nth(num_springs).unwrap() != '#')
        {
            //cfg_suffix contains the characters of cfg from index nums[0] + 1 to the end
-           let cfg_suffix: String = config.chars().skip(nums[0] as usize + 1).collect();
+           let cfg_suffix: String = config.chars().skip(num_springs + 1).collect();
            result += count(&cfg_suffix, nums[1..].to_vec(), cache);
        }
    }
