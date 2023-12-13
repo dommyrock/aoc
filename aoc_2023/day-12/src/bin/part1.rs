@@ -45,9 +45,9 @@ fn count(cfg: &str, nums: Vec<u32>) -> u64 {
         if nums[0] <= cfg.len() as u32
         //IF the first N springs are all broken
         && !cfg[..nums[0] as usize].contains(".")
-        //3 next spring afterwards doesnt exist or we reached the END OF THE ROW
+        //next spring afterwards doesnt exist or we reached the END OF THE ROW
         && (nums[0] == cfg.len() as u32 
-        //4 OR next one is operational to separate the blocks
+        //OR next one is operational to separate the blocks
         || cfg.chars().nth(nums[0] as usize).unwrap() != '#')
         {
             //cfg_suffix contains the characters of cfg from index nums[0] + 1 to the end

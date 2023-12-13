@@ -1,7 +1,9 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Instant};
 // EXACT SAME EXCEPT BECAUSE OF THE RECURSION DEPTH WE NEED TO MEMO RESULTS + x5 parsed inputs
 fn main() {
     //*HASHMAP KEY has to be static / Owned  type = (String,Vec<u32>) to account for lifetimes
+    Instant::timed(|| {
+
    let mut memo : HashMap<(String,Vec<u32>),u64> = HashMap::new();
 
    let sum = include_str!("input.txt")
@@ -23,11 +25,13 @@ fn main() {
        })
        .fold(0, |acc, t: (String, Vec<u32>)| acc + count(&t.0, t.1,&mut memo));
    println!("res {sum} ");
+});
+
 }
 
 ///Accounts for all possible outcomes 
 fn count(config: &str, nums: Vec<u32>,cache: &mut HashMap<(String,Vec<u32>),u64>) -> u64 {
-   println!("{config} {:?}",nums);//Explains it pretty well
+   //println!("{config} {:?}",nums);//Explains it pretty well
 
    //base case 1
    if config.is_empty() {
@@ -71,4 +75,22 @@ fn count(config: &str, nums: Vec<u32>,cache: &mut HashMap<(String,Vec<u32>),u64>
    cache.insert(key,result);
    
    result
+}
+trait TimedExecution {
+    fn timed<T, F>(func: F) -> T
+    where
+        F: FnOnce() -> T;
+}
+
+impl TimedExecution for std::time::Instant {
+    fn timed<T, F>(func: F) -> T
+    where
+        F: FnOnce() -> T,
+    {
+        let start_time = std::time::Instant::now();
+        let result = func();
+        let elapsed = start_time.elapsed();
+        println!("Elapsed: {:?}", elapsed);
+        result
+    }
 }
