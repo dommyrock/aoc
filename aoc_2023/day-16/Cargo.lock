@@ -3,12 +3,5 @@
 version = 3
 
 [[package]]
-name = "day-12"
-version = "0.1.0"
-dependencies = [
- "utils",
-]
-
-[[package]]
-name = "utils"
+name = "day-16"
 version = "0.1.0"

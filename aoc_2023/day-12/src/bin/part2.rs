@@ -1,8 +1,10 @@
-use std::{collections::HashMap, time::Instant};
+use std::{collections::HashMap, time};
+use utils::timed_execution::TimedExecution;
+
 // EXACT SAME EXCEPT BECAUSE OF THE RECURSION DEPTH WE NEED TO MEMO RESULTS + x5 parsed inputs
 fn main() {
     //*HASHMAP KEY has to be static / Owned  type = (String,Vec<u32>) to account for lifetimes
-    Instant::timed(|| {
+    time::Instant::timed(|| {
 
    let mut memo : HashMap<(String,Vec<u32>),u64> = HashMap::new();
 
@@ -77,22 +79,4 @@ fn count(config: &str, nums: Vec<u32>,cache: &mut HashMap<(String,Vec<u32>),u64>
    cache.insert(key,result);
    
    result
-}
-trait TimedExecution {
-    fn timed<T, F>(func: F) -> T
-    where
-        F: FnOnce() -> T;
-}
-
-impl TimedExecution for std::time::Instant {
-    fn timed<T, F>(func: F) -> T
-    where
-        F: FnOnce() -> T,
-    {
-        let start_time = std::time::Instant::now();
-        let result = func();
-        let elapsed = start_time.elapsed();
-        println!("Elapsed: {:?}", elapsed);
-        result
-    }
 }

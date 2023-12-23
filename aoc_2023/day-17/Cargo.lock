@@ -3,7 +3,7 @@
 version = 3
 
 [[package]]
-name = "day-12"
+name = "day-17"
 version = "0.1.0"
 dependencies = [
  "utils",
