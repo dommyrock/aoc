@@ -11,6 +11,7 @@ for i, (sx, sy, sz, vx, vy, vz) in enumerate(hailstones):
     equations.append((yr - sy) * (vz - vzr) - (zr - sz) * (vy - vyr))
     if i < 2:
         continue
+    # x % 1 == 0 check if values are integers
     answers = [soln for soln in sympy.solve(equations) if all(x % 1 == 0 for x in soln.values())]
     if len(answers) == 1:
         break
