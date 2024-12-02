@@ -20,18 +20,15 @@ fn is_safe(nums: &[i32]) -> bool {
         nums.windows(2).all(|w| w[1] > w[0] && check_range(w[0].abs_diff(w[1]))) || 
         nums.windows(2).all(|w| w[1] < w[0] && check_range(w[0].abs_diff(w[1])))
     };
-
     if  check_incr_or_decr(&nums)  {return true}
 
-    for skip_idx in 0..nums.len() {
-        let subset: Vec<i32> = nums
-            .iter()
+    (0..nums.len()).any(|skip_idx| {
+        let subset = nums.iter()
             .enumerate()
             .filter(|(idx, _)| *idx != skip_idx)
             .map(|(_, &num)| num)
-            .collect();
+            .collect::<Vec<i32>>();
 
-        if check_incr_or_decr(&subset) {return true}
-    }
-    false
+        check_incr_or_decr(&subset)
+    })
 }
